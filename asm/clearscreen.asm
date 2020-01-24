@@ -35,16 +35,16 @@ clear
 	iny			
 	cpy #$0				;going through 256 bytes
 	bne clear		
-	clc			
-	lda $fb				;goto next line
+	clc					;goto next block
+	lda $fb				
 	adc #$1 		
 	sta $fb			
-	cmp #$40			;repeat until past last line ($3C)
+	cmp #$40			;repeat until end of page1
 	bne newln		
 	rts    			
 start   			
 	jsr cls			
-    jsr hgr			
+	jsr hgr			
 	jsr cin			
 	jsr txtm		
 	jmp $03d0			;Return to DOS
