@@ -1,7 +1,9 @@
-;	Code for MADS assembler - Apple 2 target
-;	Used WUDSN IDE
-
-;   8 white pixel plotted at (x,y) location
+;	WUDSN IDE example MADS source file for Apple II binary file format (".b")
+;
+;	Find more information on Apple II coding and APIs in the
+;	Apple Assembly Line at http://www.txbobsc.com/aal
+;	Apple II References at https://ia700602.us.archive.org/19/items/applerefjan78/appleIIrefjan78_text.pdf
+;
 ;	@com.wudsn.ide.asm.hardware=APPLE2
 
 	crout = $fd8e		; Line break out
@@ -20,7 +22,8 @@
 	
 	.proc main		
 	jmp start	
-;	cls - Clear screen function		
+
+;CLS - CLEAR SCREEN FUNCTION	
 cls				
 	lda #$00			;initialize $2000 as the screenbase
 	sta $fa		
@@ -41,20 +44,21 @@ clear
 	cmp #$40			;repeat until end of page1
 	bne newln		
 	rts
-; 	draw a short line	
+	
+	
+;DRAW SHORT LINE - DRAW A LINE 8 PIXEL WIDE
 drawShortLine 
-	;ldy #$00			;resetting y index
 	lda drawX			;load x choord (bases lines are occure every 8 line soooooo....
 	lsr 				;divide 
 	lsr 				;by 
 	lsr					;8
 	asl 				;and multiply by 2 because there are 2 bytes per location
-    tax					;this is moved to index
-    lda screen,x			;end the two bytes are picked from screen line index
-    sta $fa
-    inx
-    lda screen,x			
-    sta $fb				;store the the base line ($2000,$2080,$2100...)				
+        tax				;this is moved to index
+        lda screen,x	;end the two bytes are picked from screen line index
+        sta $fa
+        inx
+        lda screen,x			
+        sta $fb			;store the the base line ($2000,$2080,$2100...)				
 	lda drawX			;and load x choord again to determine 1 line in the block of 1-8 lines				
 	and #$07			;for this we need 3 bits only (as this represent maximum 8 lines)
 	beq draw			;if this is the base line (0) then let's draw
@@ -76,6 +80,8 @@ draw
 	lda #$ff			;color is white
 	sta ($fa),y
 	rts
+	
+;MAIN PROGRAM	
 start   			
 	jsr cls				; Clear the screen
 	jsr drawShortLine	; Draw a box
@@ -83,33 +89,35 @@ start
 	jsr cin				; Wait for input
 	jsr txtm			; Switch back to text mode
 	jmp $03d0			; Return to DOS
-				
+
+
+;SCREEN LOCATIONS				
 screenBase .by $00 $80
-drawX      .by $15		; Screen X choord
-drawY      .by $1A		; Screen Y choord
-screen	   .by $00 $20		; list of baselines
-		 $80 $20 
-		 $00 $21
-		 $80 $21
-		 $00 $22 
-		 $80 $22 
-		 $00 $23 
-		 $80 $23 
-		 $28 $20 
-		 $A8 $20 
-		 $28 $21 
-		 $A8 $22 
-		 $22 $28 
-		 $A8 $22 
-		 $28 $23 
-		 $A8 $23 
-		 $50 $20 
-		 $D0 $20 
-		 $50 $21 
-		 $D0 $21
-		 $50 $22
-		 $D0 $22
-		 $50 $23
-		 $D0 $23
+drawX      .by $15			; Screen X choord
+drawY      .by $01			; Screen Y choord
+screen	   .by $00 $20 		; list of baselines
+    .by $80 $20 
+	.by $00 $21
+	.by $80 $21
+	.by $00 $22
+	.by $80 $22
+	.by $00 $23
+	.by $80 $23
+	.by $28 $20
+	.by $A8 $20
+	.by $28 $21
+	.by $A8 $22
+	.by $22 $28
+	.by $A8 $22
+	.by $28 $23
+	.by $A8 $23
+	.by $50 $20
+	.by $D0 $20
+	.by $50 $21
+	.by $D0 $21
+	.by $50 $22
+	.by $D0 $22
+	.by $50 $23
+	.by $D0 $23
 fineLine   .by $00
 	.endp
