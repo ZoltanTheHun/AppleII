@@ -55,26 +55,65 @@ plotPixel
 	lda screen+1
 	sta tmpHigh
 	lda color
+	ldy locy		; get Y choord
+	ldx #$fc		; define a color mask (1111 1100) 	
+sety				; find pixel
+	cpy #$0
+	beq draw
+	asl			; 1 pixel 2 bits => shift 2
+	asl
+	pha			; save color
+	txa			; move X to A to roll the maks
+	sec			; to make sure 1 is rolled from carry
+	rol
+	rol
+	tax			; move mask back to x
+	pla			; restore color
+	dey 
+	jmp sety
+draw
 	ldy #$00
-	sta (tmpLow),y
+	pha			; save color before applying color mask
+	txa			; get color mask
+	and (tmpLow),y		; apply mask on target 4 pixel
+	sta (tmpLow),y		; overwrite pixel with results
+	pla			; restore color
+	ora (tmpLow),y		; create final 4 pixel in register
+	sta (tmpLow),y		; save colors to memory
 	rts
 	
+;plot a couple of pixels on the screen
+testColorDrawing	
+	lda #$01		; load purple
+	sta color		; change color
+	jsr plotPixel		; Draw a pixel
+	lda #$02		; load green
+	sta color		; change color
+	lda #$01
+	sta locy
+	jsr plotPixel
+	lda #$03		; load white   Note: green and white next to each other will be white 1110 -> 2 high bits next to each other are white
+	sta color		; change color
+	lda #$02 
+	sta locy
+	jsr plotPixel
+	rts
+
 ;MAIN PROGRAM	
 start   			
 	jsr cls			; Clear the screen
 	jsr hgr			; Switch to graphics
-	jsr plotPixel		; Draw a box
+	jsr testColorDrawing    ;
 	jsr cin			; Wait for input
 	jsr txtm		; Switch back to text mode
 	jmp $03d0		; Return to DOS
 
 
 ;SCREEN LOCATIONS				
-screenBase .by $00 $80
-color      .by $01
-drawX      .by $15		; Screen X choord
-drawY      .by $00		; Screen Y choord
-screen	   .by $00 $20 		; list of baselines
+color	.by $00			; $00 black, $01 purple, $02 green $03 white  
+locx	.by $00			; Screen X choord
+locy	.by $00			; Screen Y choord
+screen	.by $00 $20 		; list of baselines
         .by $80 $20 
 	.by $00 $21
 	.by $80 $21
