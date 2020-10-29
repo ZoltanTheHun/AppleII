@@ -48,26 +48,37 @@ clear
 	rts
 	
 ;test color drawing in x axis
-testplot
-	lda #$AA                ; load purple
-	sta color               ; change color
-        clc                     ; store next screen address into tmp low and high
-	lda screen+0 
+testplot   
+	ldx #$00        
+drawLine
+	lda screen,x 
 	sta tmpLow
-	lda screen+1
+	inx
+	lda screen,x
 	sta tmpHigh
+	txa
+	pha                     ; saving block number
 	ldy #$00
+	ldx #$00
 drawGrid	
-        ldx gridSel      
+        txa
+        pha    
 	lda grid,x              ; load character of grid(x) 
 	sta charSel
 	jsr drawCharacter
         iny                     ; y register controls the x choordinate of the selected grid row
-	inc gridSel
-	ldx gridSel
+	pla
+	tax
+	inx
 	cpx #$28                 ; $28 = 40 different grids on a single line, because 7 bit = 3,5 pixel 280 res / 7 bit = 40
 	bne drawGrid
+	pla                      ; restoring block number
+	tax
+	inx
+	cpx #$30                 ;$30 = 48, there are 44/2  8px grid lines on screen
+        bne drawLine 
 	rts
+
 
 ; this function draws an 8x8 character on the screen	
 drawCharacter 
@@ -127,7 +138,7 @@ actScr  .by $00                 ; Signals if screen1 (0) or screen2 (1) is activ
 ; We plan to do 7 bit x 8 line grid based rendering, so we need only 24 rows (192 lines / 8 lines). 40 bytes x 24 bytes = 960 bytes.
 ; Because 960 bytes are not addressable by a single register, we will divide our grid to 240 bytes of units (960 / 4).
 grid    .by $00 $08 $00 $08 $00 $08 $00 $08 $00 $08 $00 $08 $00 $08 $00 $08 $00 $10 $00 $18 $00 $08 $00 $10 $00 $18 $00 $10 $00 $18 $00 $08 $00 $10 $00 $10 $00 $10 $20 $28 ; a single line of screen in the grid, 
-        .by $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 
+        .by $08 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 
         .by $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 
         .by $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 
         .by $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00
@@ -173,11 +184,11 @@ screen	.by $00 $20 		; list of baselines, each line will be the next 8 lines
 	.by $28 $20
 	.by $A8 $20
 	.by $28 $21
+	.by $A8 $21
 	.by $A8 $22
-	.by $22 $28
-	.by $A8 $22
-	.by $28 $23
+	.by $28 $22
 	.by $A8 $23
+	.by $28 $23
 	.by $50 $20
 	.by $D0 $20
 	.by $50 $21
