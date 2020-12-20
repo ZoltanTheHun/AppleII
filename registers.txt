@@ -1,0 +1,347 @@
+    Names shown are assembler "equate" names/labels. In a few cases, more
+than one label and function is associated with an address. A few soft
+switches have no established label.
+
+Not all switches are present on all Apple II models. In general, the
+later the model, the more features and soft switches are available.
+
+Many soft switches can be toggled via a Read or a Write. If only a
+Read or a Write is indicated, access the switch or indicator using the
+indicated method.
+ 
+
+Soft Switches and Status Indicators
+
+KEYBOARD = $C000 ;keyboard data (latched) (Read)
+                 ;Bit 7 is set to indicate a keypress
+                 ;is waiting, with the ASCII
+                 ;code in bits 6-0.
+
+CLR80STORE=$C000 ;80STORE Off- disable 80-column memory mapping (Write)
+SET80STORE=$C001 ;80STORE On- enable 80-column memory mapping (WR-only)
+
+CLRAUXRD = $C002 ;read from main 48K (WR-only)
+SETAUXRD = $C003 ;read from aux/alt 48K (WR-only)
+
+CLRAUXWR = $C004 ;write to main 48K (WR-only)
+SETAUXWR = $C005 ;write to aux/alt 48K (WR-only)
+
+CLRCXROM = $C006 ;use ROM on cards (WR-only)
+SETCXROM = $C007 ;use internal ROM (WR-only)
+
+CLRAUXZP = $C008 ;use main zero page, stack, & LC (WR-only)
+SETAUXZP = $C009 ;use alt zero page, stack, & LC (WR-only)
+
+CLRC3ROM = $C00A ;use internal Slot 3 ROM (WR-only)
+SETC3ROM = $C00B ;use external Slot 3 ROM (WR-only)
+
+CLR80VID = $C00C ;disable 80-column display mode (WR-only)
+SET80VID = $C00D ;enable 80-column display mode (WR-only)
+
+CLRALTCH = $C00E ;use main char set- norm LC, Flash UC (WR-only)
+SETALTCH = $C00F ;use alt char set- norm inverse, LC; no Flash (WR-only)
+ 
+
+STROBE =   $C010 ;clear bit 7 of keyboard data ($C000)
+If read, it also provides an "any key down" flag in bit 7, with
+the keycode in the remaining bits. (These features only apply to
+the IIe and later machines.)
+ 
+
+Bit seven of these Read Status locations is 1 if the condition is true
+
+RDLCBNK2 = $C011 ;reading from LC bank $Dx 2
+RDLCRAM =  $C012 ;reading from LC RAM
+RDRAMRD =  $C013 ;reading from aux/alt 48K
+RDRAMWR =  $C014 ;writing to aux/alt 48K
+RDCXROM =  $C015 ;using internal Slot ROM
+RDAUXZP =  $C016 ;using Slot zero page, stack, & LC
+RDC3ROM =  $C017 ;using external (Slot) C3 ROM
+RD80COL =  $C018 ;80STORE is On- using 80-column memory mapping
+RDVBLBAR = $C019 ;not VBL (VBL signal low)
+RDTEXT =   $C01A ;using text mode
+RDMIXED =  $C01B ;using mixed mode
+RDPAGE2 =  $C01C ;using text/graphics page2
+RDHIRES =  $C01D ;using Hi-res graphics mode
+RDALTCH =  $C01E ;using alternate character set
+RD80VID =  $C01F ;using 80-column display mode
+
+TAPEOUT =  $C020 ;toggle the cassette output.
+
+SPEAKER =  $C030 ;toggle speaker diaphragm
+
+STROBE =   $C040 ;generate .5 uS low pulse @ Game pin 5
+If read, you get one half-microsecond low pulse on the Game I/O
+STROBE pin; if write, you get two pulses. (IIe and ][+ only, not
+available on the IIgs).
+
+CLRTEXT =  $C050 ;display graphics
+SETTEXT =  $C051 ;display text
+
+CLRMIXED = $C052 ;clear mixed mode- enable full graphics
+SETMIXED = $C053 ;enable graphics/text mixed mode
+
+PAGE1 =    $C054 ;select text/graphics page1
+PAGE2 =    $C055 ;select text/graphics page2
+See IIe, IIc, IIgs manual for details on how these switches
+affect 80-col bank selection.
+
+CLRHIRES = $C056 ;select Lo-res
+SETHIRES = $C057 ;select Hi-res
+
+SETAN0 =   $C058 ;Set annunciator-0 output to 0
+CLRAN0 =   $C059 ;Set annunciator-0 output to 1
+SETAN1 =   $C05A ;Set annunciator-1 output to 0
+CLRAN1 =   $C05B ;Set annunciator-1 output to 1
+SETAN2 =   $C05C ;Set annunciator-2 output to 0
+CLRAN2 =   $C05D ;Set annunciator-2 output to 1
+SETAN3 =   $C05E ;Set annunciator-3 output to 0
+SETDHIRES= $C05E ;if IOUDIS Set, turn on double-hires
+CLRAN3 =   $C05F ;Set annunciator-3 output to 1
+CLRDHIRES= $C05F ;if IOUDIS Set, turn off double-hires
+Note: "0" is near 0V, "1" is near 5V.
+ 
+
+TAPEIN =   $C060 ;bit 7 = data from cassette on Apple II,
+or PB3           ;II+, IIe. On IIgs bit 7 reflects the
+                 ;status of Game Port Pushbutton 3--
+                 ;closed= 1. (read)
+
+OPNAPPLE = $C061 ;open apple (command) key data (read)
+CLSAPPLE = $C062 ;closed apple (option) key data (read)
+These are actually the first two game Pushbutton inputs (PB0
+and PB1) which are borrowed by the Open Apple and Closed Apple
+keys. Bit 7 is set (=1) in these locations if the game switch or
+corresponding key is pressed.
+
+PB2 =      $C063 ;game Pushbutton 2 (read)
+This input has an option to be connected to the shift key on
+the keyboard. (See info on the 'shift key mod'.)
+
+PADDLE0 =  $C064 ;bit 7 = status of pdl-0 timer (read)
+PADDLE1 =  $C065 ;bit 7 = status of pdl-1 timer (read)
+PADDLE2 =  $C066 ;bit 7 = status of pdl-2 timer (read)
+PADDLE3 =  $C067 ;bit 7 = status of pdl-3 timer (read)
+PDLTRIG =  $C070 ;trigger paddles
+Read this to start paddle countdown, then time the period until
+$C064-$C067 bit 7 becomes set to determine the paddle position.
+This takes up to three milliseconds if the paddle is at its maximum
+extreme (reading of 255 via the standard firmware routine).
+
+SETIOUDIS= $C07E ;enable DHIRES & disable $C058-5F (W)
+CLRIOUDIS= $C07E ;disable DHIRES & enable $C058-5F (W)
+ 
+
+"Language Card" area Switches
+Bank 1 and Bank 2 here are the 4K banks at $D000-$DFFF. The
+remaining area from $E000-$FFFF is the same for both
+sets of switches.
+
+           $C080 ;LC RAM bank2, Read and WR-protect RAM
+ROMIN =    $C081 ;LC RAM bank2, Read ROM instead of RAM,
+                 ;two or more successive reads WR-enables RAM
+           $C082 ;LC RAM bank2, Read ROM instead of RAM,
+                 ;WR-protect RAM
+LCBANK2 =  $C083 ;LC RAM bank2, Read RAM
+                 ;two or more successive reads WR-enables RAM
+           $C088 ;LC RAM bank1, Read and WR-protect RAM
+           $C089 ;LC RAM bank1, Read ROM instead of RAM,
+                 ;two or more successive reads WR-enables RAM
+           $C08A ;LC RAM bank1, Read ROM instead of RAM,
+                 ;WR-protect RAM
+LCBANK1 =  $C08B ;LC RAM bank1, Read RAM
+                 ;two or more successive reads WR-enables RAM
+           $C084-$C087 are echoes of $C080-$C083
+           $C08C-$C08F are echoes of $C088-$C08B
+ 
+
+CLRC8ROM = $CFFF ;disable Slot card C8 ROM
+Reading any location from $Cn00-$CnFF (where n is the Slot) will
+enable the $C800-$CFFF area for that card, if the card supports
+this feature. Reading $CFFF disables this area for all cards.
+ 
+
+Example: To enable double Hi-res graphics, the following code will
+accomplish this:
+
+STA SETHIRES
+STA SETAN3
+STA CLRMIXED
+STA CLRTEXT
+JSR $C300
+ 
+
+--kburtch@pts.mot.com, David Empson, Rubywand
+
+----------------------------
+ 
+
+The following is a list of PEEKs, POKEs and Pointers in the zero
+page area. Most of the information comes from the Beagle Bros chart (1982).
+
+FP= "floating point"= Applesoft BASIC   INT= Integer BASIC
+Note: Text window and related settings refer to 40-column mode
+
+Decimal | Hexadecimal |
+-----------------------------------------------------------------------------
+32      | $20         | Text window left-edge (0-39)
+33      | $21         | Text window width (1-40)
+34      | $22         | Text window top-edge (0-23)
+35      | $23         | Text window bottom (1-24)
+36      | $24         | Horizontal cursor-position (0-39)
+37      | $25         | Vertical cursor-position (0-23)
+43      | $2B         | Boot slot * 16 (after boot only)
+44      | $2C         | Lo-res line end-point
+48      | $30         | Lo-res COLOR * 17
+50      | $32         | Text output format [63=INVERSE 255=NORMAL 127=FLASH]
+51      | $33         | Prompt-character (NOTE: POKE 51,0:GOTO LINE # will
+        |             | sometimes prevent a false NOT DIRECT COMMAND
+        |             | obtained with GOTO  alone.)
+74-75   | $4A-$4B     | LOMEM address (INT)
+76-77   | $4C-$4D     | HIMEM address (INT)
+78-79   | $4E-$4F     | Random-Number Field
+103-104 | $67-$68     | Start of Applesoft program- normally set to $801
+        |             | (2049 decimal) and location $800 is set to $00.
+        |             | NOTE: To load a program above hires page 1 (at
+        |             | $4001), POKE 103,1: POKE 104,64: POKE 16384,0
+        |             | and LOAD the program.
+105-106 | $69-$6A     | LOMEM Start of varible space & end of Applesoft prgm
+107-108 | $6B-$6C     | Start of array space  (FP)
+109-110 | $6D-$6E     | End of array space  (FP)
+111-112 | $6F-$70     | Start of string-storage  (FP)
+115-116 | $73-$74     | HIMEM- the highest available Applesoft address +1
+117-118 | $75-$76     | Line being executed.  (FP)
+119-120 | $77-$78     | Line where program stopped.  (FP)
+121-122 | $79-$7A     | Address of line executing.  (FP)
+123-124 | $7B-$7C     | Current DATA line
+125-126 | $7D-$7E     | Next DATA address
+127-128 | $7F-$80     | INPUT or DATA address
+129-130 | $81-$82     | Var.last used. VAR$=CHR$(PEEK(129))+CHR$(PEEK(130))
+131-132 | $83-$84     | Last-Used-Varible Address  (FP)
+175-176 | $AF-$B0     | End of Applesoft Program (Normally=LOMEM)
+202-203 | $CA-$CB     | Start of Program Address (INT)
+204-205 | $CC-CD      | End of Varible Storage (INT)
+214     | $D6         | RUN Flag (POKE 214,255 sets Applesoft run-only.)
+216     | $D8         | ONERR Flag (POKE 216,0 cancels ONERR; en norm errs)
+218-219 | $DA-$DB     | Line# of ONERR Error
+222     | $DE         | Error Code  (FP)
+224-225 | $E0-$E1     | Horizontal Coordinate of HPLOT
+226     | $E2         | Vertical Coordinate of HPLOT
+232-233 | $E8-$E9     | Start address of Shape Table
+241     | $F1         | 256 - SPEED value (SPEED=255 --> $F1: 01)  (FP)
+250-254 | $FA-$FE     | Free Space (normally open to user)
+
+--Jon Relay and Apple II Textfiles ( http://www.textfiles.com/apple/ ).
+
+----------------------------
+ 
+
+Useful CALLs
+
+Example: from the BASIC prompt, CALL -151 enters the monitor.
+
+ Hex   Dec
+$BEF8 48888  ProDOS- recovers from "NO BUFFERS AVAILABLE" error
+$D683 54915  Inits Applesoft stack- scraps false "OUT OF MEMORY" error.
+$F328 -3288  Repairs Applesoft stack after an ONERR GOTO handles an error.
+$F3D4 -3116  HGR2
+$F3DE -3106  HGR
+$F3F2 -3086  Clear HI-RES screen to Black
+$F3F6 -3082  Clear HI-RES screen to recent HCOLOR
+$F5CB -2613  Move HI-RES cursor coords to 224-226
+$F800 -2048  PLOT a LO-RES POINT (AC:Y-COORD  Y:X-COORD)
+$F819 -2023  DRAW a HORIZONTAL LO-RES LINE.
+$F828 -2008  DRAW a VERTICAL LO-RES LINE.
+$F832 -1998  CLEAR LO-RES SCREEN 1 and set GRAPHICS mode.
+$F836 -1994  CLEAR top 20 lines of LO-RES Graphics
+$F847 -1977  CALCULATE LO-RES Graphics base ADDRESS.
+$F85F -1953  Change LO-RES COLOR to COLOR + 3
+$F940 -1728  PRINT contents of X & Y (REG 9 as 4 HEX digits)
+$F94C -1716  PRINT X BLANKS (X REG contains # to PRINT)
+$FA86 -1402  IRQ HANDLER
+$FA92 -1390  BREAK HANDLER
+$FAA6 -1370  RE-BOOTS DISK SYSTEM
+$FAD7 -1321  to display USER REGISTERS
+$FB2F -1233  TEXT- screen init
+$FB39 -1223  set SCREEN to TEXT mode
+$FB40 -1216  GR- set GRAPHICS mode
+$FB4B -1205  set NORMAL WINDOW
+$FB60 -1184  Prints the 'Apple ][' at the top of your screen.
+$FBC1 -1087  CALCULATE TEXT BASE ADDRESS
+$FBE4 -1052  SOUND BELL
+$FBF4 -1036  to MOVE CURSOR RIGHT
+$FBFD -1027  OUTPUT A-REG as ASCII on TEXT SCREEN 1
+$FC10 -1008  to MOVE CURSOR LEFT
+$FC1A  -998  to MOVE CURSOR UP
+$FC22  -990  PERFORM a VERTICAL TAB to ROW in ACCUMULATOR
+$FC2C  -980  PREFORM ESCAPE FUNCTION
+$FC42  -958  CLEAR from CURSOR to END of PAGE (ESC -F)
+$FC58  -936  HOME & CLEAR SCREEN (Destroys ACCUMULATOR & Y-REG)
+$FC62  -926  PERFORM a CARRIAGE RETURN
+$FC66  -922  PERFORM a LINE FEED
+$FC70  -912  SCOLL UP 1 LINE (Destroys ACCUMULATOR & Y-REG)
+$FC95  -875  Clear entire Text line.
+$FC9C  -868  CLEAR from CURSOR to END of LINE (ESC-E)
+$FDOC  -756  GET KEY from KEYBOARD (Destroys A & Y-REG) WAIT for KEY PRESS.
+$FD5A  -678  Wait for RETURN
+$FD5C  -676  Sound Bell and wait for RETURN
+$FD67  -665  PREFORM CARRIAGE RETURN & GET LINE of TEXT.
+$FD6A  -662  GET LINE of TEXT from KEYBOARD (X RETND with # of CHARACTERS)
+$FD6F  -657  INPUT which accepts commas & colons. Here is an example:
+             PRINT "NAME (LAST, FIRST): ";: CALL-657: N$="": FOR X= 512 TO 719:
+             IF PEEK (X) < > 141 THEN N$= N$ + CHR$ (PEEK (X) -128) : NEXT X
+
+$FD8E  -626  PRINT CARRIAGE RETURN (Destroys ACCUMULATOR & Y-REG)
+$FDDA  -550  PRINT CONTENTS of ACCUMULATOR as 2 HEX DIGETS.
+$FDE3  -541  PRINT a HEX digit
+$FDED  -531  OUTPUT CHARACTER IN ACCUMULATOR. (Destroys A & Y-REG COUNT)
+$FDF0  -528  GET MONITOR CHARACTER OUTPUT
+$FE2C  -468  PERFORM MEMORY MOVE A1-A2 TO A4. Here is an example:
+             10 POKE 60,Source Start address Lo
+             20 POKE 61,Source Start address Hi
+             30 POKE 62,Source End address Lo
+             40 POKE 63,Source End address Hi
+            50 POKE 66,Destination address Lo
+             60 POKE 67,Destination address Hi
+             70 CALL -468
+
+$FE80  -384  set INVERSE mode
+$FE84  -380  set NORMAL mode
+$FEBF  -321  DISPLAY A,S,Y,P,S REG. (CURRENT VALUES)
+$FF2D  -211  PRINT "ERR" & SOUNDS BELL (Destroys ACCUMULATOR & Y-REG)
+$FF3A  -198  PRINT BELL (Destroys ACCUMULATOR & Y-REG)
+$FF59  -167  ENTER MONITOR RESET, TEXT mode, "COLD START"
+$FF65  -155  ENTER MONITOR, ring BELL, "WARM START"
+$FF69  -151  Go to MONITOR
+$FF70  -144  SCAN INPUT BUFFER (ADDRESS $200...)
+
+--The Enforcer (on Apple II Textfiles ) and Rubywand
+
+----------------------------
+ 
+
+You can find listings of Apple II soft switches and popular monitor
+routines in a manual for your computer-- e.g. the Apple II Reference
+Manual (for II and II+), the IIe Technical Reference Manual, the Apple
+IIgs Firmware Reference Manual, etc..
+
+An excellent guide to many PEEKs & POKEs and monitor routines is the
+famous "Peeks, Pokes, and Pointers" poster from Beagle Bros (early
+1980's). A fairly exhaustive guide to important memory locations in
+the Apple II is What's Where in the Apple II: An Atlas to the Apple
+Computer by William Luebbert (1981).
+
+Other on-line lists of PEEKs & POKEs + Monitor Routines are available
+at
+
+Apple II Textfiles http://www.textfiles.com/apple/
+
+Ground's 1 World Software Wizards folder ("Mega.Peeks.and.Pokes")
+Ground: /Collections/1WSW/
+
+With very few exceptions, soft switches, monitor routines, and
+important vectors have remained stable since early Apple II
+models. So, although an old chart or listing may be missing some which
+are available on a newer Apple II, the ones shown will almost always
+work. --Rubywand and Mookie
+ 
