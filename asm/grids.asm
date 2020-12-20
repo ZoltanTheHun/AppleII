@@ -298,8 +298,9 @@ drawNextLine
 ;MAIN PROGRAM	
 start   		
 	jsr cls			; Clear the screen
-	jsr hgr			; Switch to graphics
-tst	jsr drawScreen1
+	jsr hgr
+tst	sta $C055		; Switch to graphics
+	jsr drawScreen1
 	inc grid
 	inc chara
 	inc chara+1
@@ -309,6 +310,26 @@ tst	jsr drawScreen1
 	inc chara+5
 	inc chara+6
 	inc chara+7
+	;jsr cin
+vbl	lda $C019
+	cmp #$80
+	bpl vbl
+	;jsr hgr
+	sta $C054
+	jsr drawScreen1
+	inc grid
+	inc chara
+	inc chara+1
+	inc chara+2
+	inc chara+3
+	inc chara+4
+	inc chara+5
+	inc chara+6
+	inc chara+7
+vbl2	lda $C019
+	cmp #$80
+	bpl vbl2
+	;jsr cin
 	jmp tst
 	jsr cin			; Wait for input
 	jsr txtm		; Switch back to text mode
