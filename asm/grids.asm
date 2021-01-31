@@ -161,7 +161,6 @@ drawQuadrant4
 	txa
 	pha                     ; saving block number
 	ldy #$00
-	;ldx #$00
 	ldx tmpx
 drawGrid4
 	txa
@@ -198,7 +197,6 @@ drawQuadrant1_2
 	txa
 	pha                     ; saving block number
 	ldy #$00
-	;ldx #$00
 	ldx tmpx
 drawGrid_2
 	txa
@@ -230,7 +228,6 @@ drawQuadrant2_2
 	txa
 	pha                     ; saving block number
 	ldy #$00
-	;ldx #$00
 	ldx tmpx
 drawGrid2_2
 	txa
@@ -262,7 +259,6 @@ drawQuadrant3_2
 	txa
 	pha                     ; saving block number
 	ldy #$00
-	;ldx #$00
 	ldx tmpx
 drawGrid3_2
 	txa
@@ -294,7 +290,6 @@ drawQuadrant4_2
 	txa
 	pha                     ; saving block number
 	ldy #$00
-	;ldx #$00
 	ldx tmpx
 drawGrid4_2
 	txa
@@ -349,7 +344,13 @@ drawCharacter
 	pla	                 ; once drawing finished
 	sta tmpHigh              ; the high address of screen is restored
 	rts
-	
+
+;
+; loadCharacterBank - Routine to load the location of 8 character patterns (a 64 byte long bank) from the available 64 character patterns	
+;
+; var charSel       - The id of the desired pattern, a new bank starts for every 8th pattern
+; prc bank0-7       - Bank loader routine for a 64 byte long 
+;
 loadCharacterBank
 	lda charSel
 	and #$F0                 ;bit mask 1111 0000, we need 4 high bits to decide which bank to use
@@ -429,41 +430,115 @@ drawNextLine
 	inc tmpHigh
 	rts
 	
+;
+; moveSprite - Routine that can move a 8 bit wide sprite in the first quadrant of the screen
+; This routine is using 
+; Sprite is defined as $00 $00 $00 that is: X, Y, character pattern ID
+;
+moveSprite
+	; load $00 $00 $00 (3 bytes) of sprite information
+	ldy #$00
+	lda (tmpLow),y
+	sta sptX
+	iny 
+	lda (tmpLow),y
+	sta sptY
+	iny
+	lda (tmpLow),y
+	sta sptCh
+        ;draw sprite
+	lda <grid              
+	clc
+	adc sptX
+	sta tmpLow
+	lda >grid
+	adc #$00
+	sta tmpHigh
+	lda sptCh
+	ldy #$00
+	sta (tmpLow),y
+	rts
+
+;
+; swapChara - Routine that creates the changing patterns in the grid screen as a demo effect
+;
+swapChara	
+	inc chara
+	inc chara+1
+	inc chara+2
+	inc chara+3
+	inc chara+4
+	inc chara+5
+	inc chara+6
+	inc chara+7
+	rts
+
+;
+; drawTank - Routine that clears the previous location of the player tank, then draws the tank to the new location
+;
+drawTank
+        ; clear back of tank
+	lda <tankOld
+	sta tmpLow
+	lda >tankOld
+	sta tmpHigh
+        jsr moveSprite
+        ; clear front of tank
+	lda <tankOld1
+	sta tmpLow
+	lda >tankOld1
+	sta tmpHigh
+        jsr moveSprite
+	; draw back of tank
+	lda <tank
+	sta tmpLow
+	lda >tank
+	sta tmpHigh
+        jsr moveSprite
+        ; draw front of tank
+	lda <tank1
+	sta tmpLow
+	lda >tank1
+	sta tmpHigh
+        jsr moveSprite
+        rts
+        
+;
+; moveTank - Routine that updates the location of the player tank
+; 
+moveTank
+        lda tank
+        sta tankOld
+        inc tank
+        lda tank1
+        sta tankOld1
+        inc tank1
+        rts
+	
 ;MAIN PROGRAM	
 start   		
 	jsr cls			; Clear the screen
 	jsr hgr
-tst	sta $C055		; Switch to graphics
+tst	sta $C055		; show lgr 2 while drawing lgr 1
+        jsr drawTank
+	jsr moveTank
 	jsr drawScreen1
 	inc grid
-	inc chara
-	inc chara+1
-	inc chara+2
-	inc chara+3
-	inc chara+4
-	inc chara+5
-	inc chara+6
-	inc chara+7
+        jsr swapChara
 	;jsr cin
 vbl	lda $C019
 	cmp #$80
 	bpl vbl
-	;jsr hgr
-	sta $C054
+	sta $C054              ;show lgr 1 while drawing lgr 2
+	jsr drawTank
+	jsr moveTank
 	jsr drawScreen2
 	inc grid
-	inc chara
-	inc chara+1
-	inc chara+2
-	inc chara+3
-	inc chara+4
-	inc chara+5
-	inc chara+6
-	inc chara+7
+        jsr swapChara
 vbl2	lda $C019
 	cmp #$80
 	bpl vbl2
-	;jsr cin
+        ;jsr cin
 	jmp tst
 	jsr cin			; Wait for input
 	jsr txtm		; Switch back to text mode
@@ -563,24 +638,27 @@ charf   .by $AA $AA $AA $AA $AA $AA $AA $AA
         .by $55 $00 $55 $00 $55 $00 $55 $00
         .by $55 $55 $55 $55 $55 $55 $55 $55
         .by $55 $55 $55 $55 $55 $55 $55 $55
-charg   .by $AA $AA $AA $AA $AA $AA $AA $AA
-        .by $D5 $D5 $D5 $D5 $D5 $D5 $D5 $D5
-        .by $2A $2A $2A $2A $2A $2A $2A $2A
-        .by $55 $55 $55 $55 $55 $55 $55 $55
-        .by $AA $D5 $AA $D5 $AA $D5 $AA $D5
-        .by $55 $00 $55 $00 $55 $00 $55 $00
-        .by $00 $03 $07 $06 $0C $78 $7F $0C
-        .by $00 $00 $F8 $10 $18 $1E $FE $30
-charh   .by $00 $00 $00 $00 $AA $AA $AA $AA
-        .by $D5 $D5 $D5 $D5 $D5 $D5 $D5 $D5
-        .by $2A $2A $2A $2A $2A $2A $2A $2A
-        .by $55 $55 $55 $55 $55 $55 $55 $55
-        .by $AA $D5 $AA $D5 $AA $D5 $AA $D5
-        .by $55 $00 $55 $00 $55 $00 $55 $00
-        .by $00 $00 $00 $00 $00 $00 $00 $00
-        .by $00 $00 $00 $00 $00 $00 $00 $00
-screen	.by $00 $20 		; list of baselines, each line will be the next 8 lines
-        .by $80 $20 
+charg   
+	.by $AA $AA $AA $AA $AA $AA $AA $AA
+	.by $D5 $D5 $D5 $D5 $D5 $D5 $D5 $D5
+	.by $2A $2A $2A $2A $2A $2A $2A $2A
+	.by $55 $55 $55 $55 $55 $55 $55 $55
+	.by $AA $D5 $AA $D5 $AA $D5 $AA $D5
+	.by $55 $00 $55 $00 $55 $00 $55 $00
+	.by $00 $03 $07 $06 $0C $78 $7F $0C
+	.by $00 $00 $F8 $10 $18 $1E $FE $30
+charh
+	.by $00 $00 $00 $00 $AA $AA $AA $AA
+	.by $D5 $D5 $D5 $D5 $D5 $D5 $D5 $D5
+	.by $2A $2A $2A $2A $2A $2A $2A $2A
+	.by $55 $55 $55 $55 $55 $55 $55 $55
+	.by $AA $D5 $AA $D5 $AA $D5 $AA $D5
+	.by $55 $00 $55 $00 $55 $00 $55 $00
+	.by $00 $00 $00 $00 $00 $00 $00 $00
+	.by $00 $00 $00 $00 $00 $00 $00 $00
+screen	
+	.by $00 $20 		; list of baselines, each line will be the next 8 lines
+	.by $80 $20
 	.by $00 $21
 	.by $80 $21
 	.by $00 $22
@@ -603,8 +681,9 @@ screen	.by $00 $20 		; list of baselines, each line will be the next 8 lines
 	.by $D0 $22
 	.by $50 $23
 	.by $D0 $23
-screen2 .by $00 $40
-        .by $80 $40 
+screen2 
+	.by $00 $40
+	.by $80 $40
 	.by $00 $41
 	.by $80 $41
 	.by $00 $42
@@ -628,5 +707,15 @@ screen2 .by $00 $40
 	.by $50 $43
 	.by $D0 $43
 fineLine   .by $00
+
+sprite1_x .by 00
+mask      .by 00
+tankOld   .by $00 $00 $00
+tank      .by $00 $00 $67
+tankOld1  .by $01 $00 $00
+tank1     .by $01 $00 $66
+sptCh     .by $00 
+sptX      .by $00
+sptY      .by $00 
 	.endp
 	
