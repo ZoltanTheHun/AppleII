@@ -525,13 +525,64 @@ drawTank
 ; moveTank - Routine that updates the location of the player tank
 ; 
 moveTank
+	lda $C000
+	cmp #$80
+	bpl checkDirN
+	rts
+checkDirN	
+	and #$7F     ; AND 0111 1111 to clear strobe
+	cmp #$49     ; I
+	bne checkDirE
+	lda tank+1
+	sta tankOld+1
+	dec tank+1
+	lda tank1+1
+	sta tankOld1+1
+	dec tank1+1
+	lda #00
+	sta $C000
+	sta $C010
+	rts 
+checkDirE
+	cmp #$4B     ; K
+	bne checkDirS
 	lda tank
 	sta tankOld
 	inc tank
 	lda tank1
 	sta tankOld1
 	inc tank1
+	lda #00
+	sta $C000
+	sta $C010
 	rts
+checkDirS
+	cmp #$4D     ; M
+	bne checkDirW
+	lda tank+1
+	sta tankOld+1
+	inc tank+1
+	lda tank1+1
+	sta tankOld1+1
+	inc tank1+1
+	lda #00
+	sta $C000
+	sta $C010
+	rts
+checkDirW
+	cmp #$4A     ; J
+	bne checkDirS
+	lda tank
+	sta tankOld
+	dec tank
+	lda tank1
+	sta tankOld1
+	dec tank1
+	lda #00
+	sta $C000
+	sta $C010
+	rts
+
 	
 ;MAIN PROGRAM	
 start   		
@@ -555,7 +606,7 @@ vbl	lda $C019
 	jsr moveTank
 	jsr drawScreen2
 	inc grid
-	jsr swapChara
+	;jsr swapChara
 	;wait for vertical blank
 vbl2	lda $C019
 	cmp #$80
@@ -732,10 +783,10 @@ fineLine   .by $00
 
 sprite1_x .by 00
 mask      .by 00
-tankOld   .by $00 $17 $00
-tank      .by $00 $17 $67
-tankOld1  .by $01 $17 $00
-tank1     .by $01 $17 $66
+tankOld   .by $00 $00 $00
+tank      .by $00 $00 $67
+tankOld1  .by $01 $00 $00
+tank1     .by $01 $00 $66
 sptCh     .by $00 
 sptX      .by $00
 sptY      .by $00 
